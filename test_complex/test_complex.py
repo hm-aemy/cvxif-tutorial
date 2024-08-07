@@ -2,7 +2,10 @@ import cocotb
 from cocotb.binary import BinaryValue
 from cocotb.triggers import Timer
 from cocotb.binary import BinaryRepresentation
+from cocotb.runner import get_runner
+
 import random
+from pathlib import Path
 
 def complex_to_32bits(value):
     real = BinaryValue(int(value.real),n_bits=16,bigEndian=False,binaryRepresentation=BinaryRepresentation.TWOS_COMPLEMENT)
@@ -37,6 +40,7 @@ async def complex_add_test(dut):
         dut.op.value = 0
 
         await Timer(1, units='ns')
+
         sum = complex_overflow(A + B)
         assert dut.c.value == complex_to_32bits(sum)
 
@@ -55,3 +59,23 @@ async def complex_conjugate_test(dut):
         await Timer(1, units='ns')
 
         assert dut.c.value == complex_to_32bits(A.conjugate())
+
+def test_complex_runner():
+    proj_path = Path(__file__).resolve().parent.parent
+
+    sources = [proj_path / "rtl" / "complex.sv"]
+
+    runner = get_runner("icarus")
+    runner.build(
+        sources=sources,
+        hdl_toplevel="complex",
+        always=True,
+        build_args=[],
+    )
+    runner.test(
+        hdl_toplevel="complex", test_module="test_complex", test_args=[]
+    )
+
+
+if __name__ == "__main__":
+    test_complex_runner()

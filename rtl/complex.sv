@@ -3,6 +3,7 @@
 
 // op==0: add complex number a and b
 // op==1: complex conjugate of a
+`timescale 1ns/1ns
 
 module complex(
     input op,
